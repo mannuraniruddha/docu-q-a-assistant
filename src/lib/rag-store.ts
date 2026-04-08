@@ -59,7 +59,7 @@ export interface ChatMessage {
 }
 
 export interface RAGSettings {
-  provider: "lovable" | "openai" | "gemini";
+  provider: "default" | "openai" | "gemini";
   openaiKey: string;
   geminiKey: string;
   model: string;
@@ -89,7 +89,7 @@ export const useRAGStore = create<RAGStore>((set) => ({
   documents: [],
   messages: [],
   settings: {
-    provider: "lovable",
+    provider: "default",
     openaiKey: "",
     geminiKey: "",
     model: "google/gemini-3-flash-preview",

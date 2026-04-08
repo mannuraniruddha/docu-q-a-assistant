@@ -49,7 +49,7 @@ async function getEmbeddings(
 ): Promise<{ embeddings: number[][]; model: string; dimensions: number }> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-  if (provider === "lovable" || (!openaiKey && !geminiKey)) {
+  if (provider === "default" || (!openaiKey && !geminiKey)) {
     if (!LOVABLE_API_KEY) {
       // Fallback: generate simple hash-based pseudo-embeddings
       return {
@@ -62,10 +62,10 @@ async function getEmbeddings(
     // Use Lovable AI for embeddings via chat completion (extract semantic representation)
     const embeddings: number[][] = [];
     for (const text of texts) {
-      const embedding = await getLovableEmbedding(text, LOVABLE_API_KEY);
+      const embedding = await getDefaultEmbedding(text, LOVABLE_API_KEY);
       embeddings.push(embedding);
     }
-    return { embeddings, model: "lovable-ai-semantic", dimensions: 64 };
+    return { embeddings, model: "built-in-semantic", dimensions: 64 };
   }
 
   if (provider === "openai" && openaiKey) {
@@ -144,7 +144,7 @@ function simpleEmbedding(text: string): number[] {
   return embedding.map((v) => v / mag);
 }
 
-async function getLovableEmbedding(text: string, apiKey: string): Promise<number[]> {
+async function getDefaultEmbedding(text: string, apiKey: string): Promise<number[]> {
   // Use Lovable AI to generate a semantic fingerprint via structured output
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -193,7 +193,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, fileName, chunkSize = 500, chunkOverlap = 50, provider = "lovable", openaiKey, geminiKey } =
+    const { text, fileName, chunkSize = 500, chunkOverlap = 50, provider = "default", openaiKey, geminiKey } =
       await req.json();
 
     if (!text || !fileName) {

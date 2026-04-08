@@ -39,7 +39,7 @@ async function getQueryEmbedding(
 ): Promise<number[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-  if (provider === "lovable" || (!openaiKey && !geminiKey)) {
+  if (provider === "default" || (!openaiKey && !geminiKey)) {
     if (!LOVABLE_API_KEY) return simpleEmbedding(query);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -126,7 +126,7 @@ serve(async (req) => {
       });
     }
 
-    const { provider = "lovable", openaiKey, geminiKey, model = "google/gemini-3-flash-preview", topK = 5, chunkSize = 500, chunkOverlap = 50 } =
+    const { provider = "default", openaiKey, geminiKey, model = "google/gemini-3-flash-preview", topK = 5, chunkSize = 500, chunkOverlap = 50 } =
       settings || {};
 
     // Step 1: Get query embedding
@@ -173,7 +173,7 @@ INSTRUCTIONS:
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    if (provider === "lovable" || (!openaiKey && !geminiKey)) {
+    if (provider === "default" || (!openaiKey && !geminiKey)) {
       if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -254,7 +254,7 @@ INSTRUCTIONS:
         })),
       },
       embeddings: {
-        model: provider === "openai" ? "text-embedding-3-small" : provider === "gemini" ? "text-embedding-004" : "lovable-ai-semantic",
+        model: provider === "openai" ? "text-embedding-3-small" : provider === "gemini" ? "text-embedding-004" : "built-in-semantic",
         dimensions: queryEmbedding.length,
         latencyMs: embLatency,
       },

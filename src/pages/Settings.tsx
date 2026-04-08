@@ -8,13 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Shield, Key, Sliders, Brain } from "lucide-react";
 
 const providers = [
-  { value: "lovable", label: "Lovable AI (default)", description: "No API key needed" },
+  { value: "default", label: "Built-in AI (default)", description: "No API key needed" },
   { value: "openai", label: "OpenAI", description: "Requires API key" },
   { value: "gemini", label: "Google Gemini", description: "Requires API key" },
 ];
 
 const models: Record<string, { value: string; label: string }[]> = {
-  lovable: [
+  default: [
     { value: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (default)" },
     { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
     { value: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
@@ -33,7 +33,7 @@ const models: Record<string, { value: string; label: string }[]> = {
 
 export default function Settings() {
   const { settings, setSettings } = useRAGStore();
-  const currentModels = models[settings.provider] || models.lovable;
+  const currentModels = models[settings.provider] || models.default;
 
   return (
     <div className="container py-6 max-w-3xl space-y-6">
@@ -63,7 +63,7 @@ export default function Settings() {
                   <SelectItem key={p.value} value={p.value}>
                     <div className="flex items-center gap-2">
                       {p.label}
-                      {p.value === "lovable" && <Badge variant="secondary" className="text-xs">Free</Badge>}
+                      {p.value === "default" && <Badge variant="secondary" className="text-xs">Free</Badge>}
                     </div>
                   </SelectItem>
                 ))}
