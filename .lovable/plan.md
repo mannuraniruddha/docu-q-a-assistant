@@ -1,62 +1,53 @@
 
-# RAG Document QA App
 
-## Overview
-A web app that lets users upload documents (PDF, TXT, MD), ask questions using RAG (Retrieval-Augmented Generation), and inspect every pipeline step. Uses Lovable AI by default with the option to plug in your own OpenAI/Gemini keys.
+# Plan: Remove Lovable References + E2E Pipeline Verification
 
-## Pages
+## Pipeline Test Result
+I tested the `process-document` edge function end-to-end — it successfully chunked text and generated embeddings using the AI gateway. The pipeline is working.
 
-### 1. Home / Upload & Chat Page (`/`)
-- **Document upload area** — drag-and-drop or file picker for PDF, TXT, MD files
-- **Document list** — shows uploaded docs with name, type, chunk count, status
-- **Chat interface** — ask questions, get answers with source citations
-- **Collapsible debug panel** on each answer showing:
-  - **Chunking** — extracted text chunks with sizes, overlap info
-  - **Embeddings** — similarity scores for top-k retrieved chunks
-  - **Retrieval** — which chunks were selected and why
-  - **Generation** — the full prompt sent to the LLM, latency stats
-- Pre-loaded demo document (a sample PDF about RAG concepts) so users can try immediately
+## Changes to Remove Lovable References
 
-### 2. Settings Page (`/settings`)
-- Toggle between Lovable AI (default) and user-provided keys
-- Input fields for OpenAI API key and Gemini API key
-- Model selection dropdown
-- Chunking parameters: chunk size, overlap size
-- Top-k retrieval count
+The default AI provider will be renamed from "lovable" to "default" throughout the app. The AI gateway URL and LOVABLE_API_KEY remain unchanged in the edge functions (they're internal infrastructure, not user-facing), but all user-visible labels and references will be neutralized.
 
-### 3. README Page (`/readme`)
-- Project overview and architecture diagram
-- File-by-file breakdown explaining each component and method
-- Why each piece matters for Technical Program Manager work
-- Qualities showcased: systems thinking, pipeline design, trade-off awareness, documentation
+### 1. `index.html` — Update metadata
+- Change title from "Lovable App" to "RAG Document QA"
+- Update meta description, og:title, remove Lovable opengraph image and Twitter references
 
-### 4. RAG Deep Dive Page (`/rag-explained`)
-- **RAG Pipeline** — retrieval → augmentation → generation explained
-- **Chunking Strategies** — fixed-size, sentence-based, trade-offs
-- **Embedding Model Selection** — model choices, fallback strategies
-- **Prompt Engineering** — citation formatting, context window management
-- **Production Thinking** — graceful degradation, latency tracking, error handling
+### 2. `src/lib/rag-store.ts` — Rename provider type
+- Change `"lovable"` to `"default"` in the `RAGSettings` type union and default value
 
-## Backend (Edge Functions)
+### 3. `src/pages/Settings.tsx` — Update UI labels
+- Rename provider from "Lovable AI (default)" to "Built-in AI (default)"
+- Change `lovable` key to `default` in providers and models arrays
+- Update badge and conditional checks
 
-### `process-document` function
-- Receives uploaded file content
-- Extracts text (PDF parsing, plain text reading)
-- Chunks text with configurable size/overlap
-- Generates embeddings via Lovable AI or user-provided key
-- Returns chunks and embeddings to the client
+### 4. `src/pages/RagExplained.tsx` — Update text
+- Change "Lovable AI" reference to "Built-in AI" in the fallback chain explanation
 
-### `rag-query` function
-- Receives question + document embeddings
-- Computes similarity search against stored chunks
-- Builds augmented prompt with retrieved context
-- Calls LLM (Lovable AI or user key) for generation
-- Returns answer + full debug info (scores, prompt, latency)
+### 5. `src/pages/ReadmePage.tsx` — Update text
+- Change "Lovable / OpenAI / Gemini" to "Built-in AI / OpenAI / Gemini" in architecture diagram
+- Update tech stack bullet point
 
-## Key Technical Details
-- **Client-side storage** — embeddings and chunks stored in browser (IndexedDB/state) for simplicity
-- **Chunking** — configurable fixed-size with overlap, displayed in debug panel
-- **Similarity search** — cosine similarity computed in the edge function
-- **Error handling** — graceful fallback if AI provider fails, clear error messages
-- **Latency tracking** — each pipeline step timed and shown in debug panel
-- **Demo document** — bundled sample document ready to use on first load
+### 6. `supabase/functions/process-document/index.ts` — Internal rename
+- Change `provider === "lovable"` checks to `provider === "default"`
+- Change default provider parameter from `"lovable"` to `"default"`
+- Rename `getLovableEmbedding` to `getDefaultEmbedding`
+- Update model name from `"lovable-ai-semantic"` to `"built-in-semantic"`
+
+### 7. `supabase/functions/rag-query/index.ts` — Internal rename
+- Change `provider === "lovable"` checks to `provider === "default"`
+- Change default provider parameter from `"lovable"` to `"default"`
+- Update model name reference from `"lovable-ai-semantic"` to `"built-in-semantic"`
+
+### 8. `src/pages/Index.tsx` — No changes needed (no Lovable references)
+
+### Not Changed (infrastructure — invisible to users)
+- `vite.config.ts` — `lovable-tagger` is a dev dependency for the Lovable platform; removing it would break the dev environment
+- `.env` — auto-generated, must not be edited
+- `src/integrations/supabase/client.ts` — auto-generated
+- Edge function gateway URL (`ai.gateway.lovable.dev`) — this is the backend infrastructure URL, not visible to users
+
+### Post-Implementation
+- Redeploy both edge functions
+- Test the full pipeline again to verify nothing broke
+
