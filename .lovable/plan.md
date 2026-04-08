@@ -1,53 +1,33 @@
 
 
-# Plan: Remove Lovable References + E2E Pipeline Verification
+# Fix GitHub Pages Deployment
 
-## Pipeline Test Result
-I tested the `process-document` edge function end-to-end — it successfully chunked text and generated embeddings using the AI gateway. The pipeline is working.
+## Problem
+Your app fails on GitHub Pages because of two issues:
 
-## Changes to Remove Lovable References
+1. **Base path mismatch** — GitHub Pages serves your app at `/docu-q-a-assistant/`, but Vite builds with base `/`. All JS, CSS, and asset URLs point to the root and return 404.
 
-The default AI provider will be renamed from "lovable" to "default" throughout the app. The AI gateway URL and LOVABLE_API_KEY remain unchanged in the edge functions (they're internal infrastructure, not user-facing), but all user-visible labels and references will be neutralized.
+2. **SPA routing** — GitHub Pages serves static files only. Navigating to `/settings` or refreshing any page returns a 404 because there's no server-side fallback.
 
-### 1. `index.html` — Update metadata
-- Change title from "Lovable App" to "RAG Document QA"
-- Update meta description, og:title, remove Lovable opengraph image and Twitter references
+The Node.js 20 warning is harmless and can be ignored until June 2026.
 
-### 2. `src/lib/rag-store.ts` — Rename provider type
-- Change `"lovable"` to `"default"` in the `RAGSettings` type union and default value
+## Changes
 
-### 3. `src/pages/Settings.tsx` — Update UI labels
-- Rename provider from "Lovable AI (default)" to "Built-in AI (default)"
-- Change `lovable` key to `default` in providers and models arrays
-- Update badge and conditional checks
+### 1. `vite.config.ts` — Set base path
+Add `base: "/docu-q-a-assistant/"` so all built asset URLs are prefixed correctly for GitHub Pages.
 
-### 4. `src/pages/RagExplained.tsx` — Update text
-- Change "Lovable AI" reference to "Built-in AI" in the fallback chain explanation
+### 2. `src/App.tsx` — Set router basename
+Change `<BrowserRouter>` to `<BrowserRouter basename="/docu-q-a-assistant">` so React Router matches routes correctly under the subdirectory.
 
-### 5. `src/pages/ReadmePage.tsx` — Update text
-- Change "Lovable / OpenAI / Gemini" to "Built-in AI / OpenAI / Gemini" in architecture diagram
-- Update tech stack bullet point
+### 3. `public/404.html` — SPA redirect hack
+Create a `404.html` that GitHub Pages serves for unknown routes. It redirects to `index.html` with the path encoded as a query parameter — a standard workaround for SPAs on GitHub Pages.
 
-### 6. `supabase/functions/process-document/index.ts` — Internal rename
-- Change `provider === "lovable"` checks to `provider === "default"`
-- Change default provider parameter from `"lovable"` to `"default"`
-- Rename `getLovableEmbedding` to `getDefaultEmbedding`
-- Update model name from `"lovable-ai-semantic"` to `"built-in-semantic"`
+### 4. `index.html` — Add redirect script
+Add a small inline script in `<head>` that reads the encoded path from the query parameter and restores it via `history.replaceState` before React loads.
 
-### 7. `supabase/functions/rag-query/index.ts` — Internal rename
-- Change `provider === "lovable"` checks to `provider === "default"`
-- Change default provider parameter from `"lovable"` to `"default"`
-- Update model name reference from `"lovable-ai-semantic"` to `"built-in-semantic"`
+### 5. `.github/workflows/deploy.yml` — GitHub Actions workflow
+Create a workflow that builds the app and deploys to GitHub Pages on push to `main`. Uses `actions/configure-pages`, `actions/upload-pages-artifact`, and `actions/deploy-pages`.
 
-### 8. `src/pages/Index.tsx` — No changes needed (no Lovable references)
-
-### Not Changed (infrastructure — invisible to users)
-- `vite.config.ts` — `lovable-tagger` is a dev dependency for the Lovable platform; removing it would break the dev environment
-- `.env` — auto-generated, must not be edited
-- `src/integrations/supabase/client.ts` — auto-generated
-- Edge function gateway URL (`ai.gateway.lovable.dev`) — this is the backend infrastructure URL, not visible to users
-
-### Post-Implementation
-- Redeploy both edge functions
-- Test the full pipeline again to verify nothing broke
+## Technical Note
+The edge functions (document processing, RAG queries) are hosted on the backend and will continue to work regardless of where the frontend is hosted — no changes needed there.
 
