@@ -15,7 +15,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/docu-q-a-assistant">
         <Layout>
           <Routes>
             <Route path="/" element={<Index />} />
