@@ -94,7 +94,7 @@ export default function ReadmePage() {
          │              │
     ┌────▼──────────────▼────┐
     │   AI Gateway / API      │
-    │  (Lovable / OpenAI /    │
+    │  (Built-in AI / OpenAI /│
     │   Gemini)               │
     └─────────────────────────┘`}
           </pre>
@@ -104,7 +104,7 @@ export default function ReadmePage() {
             <li><strong>Frontend:</strong> React 18, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion</li>
             <li><strong>State:</strong> Zustand (client-side document & message store)</li>
             <li><strong>Backend:</strong> Supabase Edge Functions (Deno runtime)</li>
-            <li><strong>AI:</strong> Lovable AI Gateway (default), OpenAI, Google Gemini</li>
+            <li><strong>AI:</strong> Built-in AI (default), OpenAI, Google Gemini</li>
           </ul>
         </CardContent>
       </Card>

@@ -111,7 +111,7 @@ export default function RagExplained() {
               <h4 className="font-mono">Fallback Strategy</h4>
               <p>This app implements a provider fallback chain:</p>
               <ol>
-                <li>Try the selected provider (Lovable AI / OpenAI / Gemini)</li>
+                <li>Try the selected provider (Built-in AI / OpenAI / Gemini)</li>
                 <li>If it fails, fall back to simple TF-IDF similarity (keyword matching)</li>
                 <li>Always return results — even degraded quality is better than an error</li>
               </ol>
