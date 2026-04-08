@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { FileText, Settings, BookOpen, Brain, Menu, X } from "lucide-react";
+import { FileText, Settings, Brain, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { path: "/", label: "Upload & Chat", icon: FileText },
   { path: "/settings", label: "Settings", icon: Settings },
-  { path: "/readme", label: "README", icon: BookOpen },
-  { path: "/rag-explained", label: "RAG Deep Dive", icon: Brain },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
